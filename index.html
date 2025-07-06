@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteador de Perguntas - Tempo de Qualidade Familiar</title>
+    <style>
+        /* Reset e Estilos Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Triângulos de Fundo */
+        .background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .triangle {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-bottom: 35px solid #1a73e8;
+            opacity: 0.7;
+        }
+
+        /* Novo Menu com Efeito de Borda Animada */
+        .box {
+            position: relative;
+            width: 380px;
+            height: 420px;
+            background: #1c1c1c;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .box::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #ffd700, #1a73e8, #ffd700);
+            filter: drop-shadow(0 15px 50px #000);
+            border-radius: 20px;
+            animation: rotating 4s linear infinite;
+            animation-delay: -1s;
+        }
+
+        .box::after {
+            content: "";
+            position: absolute;
+            inset: 4px;
+            background: #2d2d39;
+            border-radius: 15px;
+            border: 8px solid #25252b;
+        }
+
+        @keyframes rotating {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Conteúdo do Menu */
+        .form-container {
+            position: absolute;
+            inset: 20px;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            padding: 30px;
+        }
+
+        h1 {
+            color: #ffd700;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .inputBox {
+            position: relative;
+        }
+
+        .inputBox input {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: 0.5s;
+        }
+
+        .inputBox input:focus {
+            border-color: #ffd700;
+        }
+
+        .inputBox label {
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            color: #888;
+            pointer-events: none;
+            transition: 0.5s;
+        }
+
+        .inputBox input:focus ~ label,
+        .inputBox input:valid ~ label {
+            transform: translateY(-20px);
+            font-size: 12px;
+            color: #ffd700;
+            background: #2d2d39;
+            padding: 0 5px;
+        }
+
+        button {
+            background: #ffd700;
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.5s;
+        }
+
+        button:hover {
+            background: #1a73e8;
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        /* Página de Sorteio */
+        .question-page {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+        }
+
+        .header {
+            margin-bottom: 30px;
+            color: #ffd700;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .question-box {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            max-width: 600px;
+            width: 90%;
+            margin-bottom: 30px;
+        }
+
+        .question {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .draw-btn {
+            background: #ffd700;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .draw-btn:hover {
+            background: #1a73e8;
+            color: white;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- Triângulos de Fundo -->
+    <div class="background" id="background"></div>
+
+    <!-- Novo Menu de Login -->
+    <div class="box" id="menuPage">
+        <div class="form-container">
+            <h1>TEMPO DE QUALIDADE FAMILIAR</h1>
+            <div class="inputBox">
+                <input type="text" id="nickname" required>
+                <label>Digite seu apelido</label>
+            </div>
+            <button id="loginBtn">INICIAR SORTEIO</button>
+        </div>
+    </div>
+
+    <!-- Página de Sorteio -->
+    <div class="question-page" id="questionPage">
+        <div class="header">
+            <h2>PROJETO DE ENFERMAGEM UNIRIO</h2>
+            <p id="participantName"></p>
+        </div>
+        <div class="question-box">
+            <p class="question" id="question">Clique no botão para sortear uma pergunta.</p>
+        </div>
+        <button class="draw-btn" id="drawBtn">SORTEAR PERGUNTA</button>
+    </div>
+
+    <script>
+        // Gerar triângulos aleatórios
+        const background = document.getElementById('background');
+        for (let i = 0; i < 20; i++) {
+            const triangle = document.createElement('div');
+            triangle.classList.add('triangle');
+            triangle.style.left = `${Math.random() * 100}%`;
+            triangle.style.top = `${Math.random() * 100}%`;
+            triangle.style.transform = `rotate(${Math.random() * 360}deg)`;
+            background.appendChild(triangle);
+        }
+
+        // Efeito de hover nos triângulos
+        document.querySelectorAll('.triangle').forEach(triangle => {
+            triangle.addEventListener('mouseover', () => {
+                triangle.style.borderBottomColor = '#ffd700';
+            });
+            triangle.addEventListener('mouseout', () => {
+                triangle.style.borderBottomColor = '#1a73e8';
+            });
+        });
+
+        // Lógica do Menu
+        const loginBtn = document.getElementById('loginBtn');
+        const nicknameInput = document.getElementById('nickname');
+        const menuPage = document.getElementById('menuPage');
+        const questionPage = document.getElementById('questionPage');
+        const questionElement = document.getElementById('question');
+        const drawBtn = document.getElementById('drawBtn');
+        const participantName = document.getElementById('participantName');
+
+        loginBtn.addEventListener('click', () => {
+            const nickname = nicknameInput.value.trim();
+            
+            if (!nickname) {
+                alert('Por favor, digite um apelido!');
+                return;
+            }
+            
+            menuPage.style.display = 'none';
+            questionPage.style.display = 'flex';
+            participantName.textContent = `Participante: ${nickname}`;
+        });
+
+        // Perguntas
+        const questions = [
+            "O que significa 'tempo de qualidade' para você?",
+            "Como sua família costuma passar tempo junta?",
+            "Qual foi a última vez que você fez algo especial com sua família?",
+            "Como você equilibra trabalho e tempo em família?",
+            "Qual atividade em família você mais gosta?",
+            "O que você acha que poderia melhorar no tempo com sua família?",
+            "Como você lida com distrações (celular, TV) durante o tempo em família?",
+            "Qual a importância das refeições em família para você?",
+            "Como sua família se conecta emocionalmente?",
+            "Você acha que passa tempo suficiente com sua família? Por quê?",
+            "Qual memória em família você mais valoriza?",
+            "Como você inclui todos os membros da família nas atividades?",
+            "O que você faz para criar momentos significativos com seus filhos/pais?",
+            "Como sua família lida com conflitos durante o tempo juntos?",
+            "Qual o maior desafio para ter tempo de qualidade em família?",
+            "Você já tentou estabelecer uma rotina familiar? Como foi?",
+            "Como a tecnologia afeta o tempo em família na sua casa?",
+            "O que você acha que falta para ter mais tempo de qualidade em família?",
+            "Como você ensina valores familiares durante o tempo juntos?",
+            "Qual a diferença entre 'tempo junto' e 'tempo de qualidade' para você?",
+            "Como você se sente quando o tempo em família é interrompido?",
+            "O que você faz para reconectar com sua família após um dia estressante?",
+            "Como sua família celebra pequenos momentos juntos?",
+            "Qual conselho você daria para outras famílias melhorarem seu tempo juntas?",
+            "Se você pudesse planejar um dia perfeito em família, como seria?"
+        ];
+
+        let lastQuestionIndex = -1;
+
+        drawBtn.addEventListener('click', () => {
+            let randomIndex;
+            // Diminui a chance de repetir a mesma pergunta
+            do {
+                randomIndex = Math.floor(Math.random() * questions.length);
+            } while (randomIndex === lastQuestionIndex && Math.random() > 0.3); // 30% de chance de repetir
+
+            lastQuestionIndex = randomIndex;
+            questionElement.textContent = questions[randomIndex];
+        });
+    </script>
+</body>
+</html>
